@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState } from 'react';
 
 import {
   CategoryScale,
@@ -22,7 +22,7 @@ import { getGasTransactions } from '../../store/selectors';
 import { TimeRange } from '../Range/Range';
 
 import style from './style/currencyChart.module.scss';
-import { createGasChartData, getDateLabels } from './utils/utils';
+import { getDateLabels } from './utils/utils';
 
 ChartJS.register(
   CategoryScale,
@@ -39,17 +39,21 @@ ChartJS.register(
 export const CurrencyChart = () => {
   const gasTransactions = useAppSelector(getGasTransactions);
 
-  useEffect(() => {
-    setDataInterval(gasTransactions);
-  }, []);
-
   const [dataInterval, setDataInterval] = useState(gasTransactions);
-  const pointsData = createGasChartData(dataInterval);
+
+  const gasPrices = dataInterval.map(trans => trans.gasPrice);
   const gasTimes = gasTransactions.map(trans => getDateLabels(trans.time));
+  const labelTimes = dataInterval.map(trans => getDateLabels(trans.time));
+  const pointsData: number[][] = [];
+
+  gasPrices.forEach((gasPrice, index) => {
+    pointsData.push([gasTimes[index], gasPrice]);
+  });
   const data: ChartData<'line'> = {
+    labels: labelTimes,
     datasets: [
       {
-        data: pointsData,
+        data: gasPrices,
         borderColor: '#4C8ADA',
         borderWidth: 1,
         indexAxis: 'x',
@@ -60,7 +64,6 @@ export const CurrencyChart = () => {
 
   const options: ChartOptions<'line'> = {
     responsive: true,
-    parsing: false,
 
     interaction: {
       intersect: false,
@@ -71,7 +74,7 @@ export const CurrencyChart = () => {
         display: false,
       },
       decimation: {
-        enabled: true,
+        enabled: false,
         algorithm: 'lttb',
         samples: 200,
       },
@@ -95,6 +98,7 @@ export const CurrencyChart = () => {
   };
 
   const onTimeRangeChange = (dataInterval: number[]) => {
+    console.log(1);
     const startDataIndex = gasTimes.indexOf(dataInterval[0]);
     const endDataIndex = gasTimes.indexOf(dataInterval[1]);
     const newDataInterval = gasTransactions.slice(startDataIndex, endDataIndex);
