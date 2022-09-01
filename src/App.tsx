@@ -1,26 +1,30 @@
-import React from 'react';
-import logo from './logo.svg';
-import './App.css';
+import { useEffect } from 'react';
 
-function App() {
+import style from './App.module.scss';
+import { CurrencyChart } from './components';
+import { Preloader } from './components/Preloader';
+import { useAppDispatch, useAppSelector } from './hooks';
+import { fetchGasTransactions } from './store/reducers/ethereum/ethereumReducer';
+import { getStatus } from './store/selectors';
+
+export const App = () => {
+  const dispatch = useAppDispatch();
+
+  const status = useAppSelector(getStatus);
+
+  useEffect(() => {
+    dispatch(fetchGasTransactions());
+  }, []);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.tsx</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+    <div className={style.container}>
+      {status === 'loading' ? (
+        <Preloader />
+      ) : (
+        <div className={style.chartBlock}>
+          <CurrencyChart />
+        </div>
+      )}
     </div>
   );
-}
-
-export default App;
+};
