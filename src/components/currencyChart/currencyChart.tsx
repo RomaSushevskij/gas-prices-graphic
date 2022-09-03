@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import {
   CategoryScale,
@@ -17,12 +17,15 @@ import {
 import 'chartjs-adapter-moment';
 import { Line } from 'react-chartjs-2';
 
-import { useAppSelector } from '../../hooks';
+import { useAppSelector, useChartData } from '../../hooks';
 import { getGasTransactions } from '../../store/selectors';
-import { TimeRange } from '../Range/Range';
+import { ChartPeriodType, GasPriceUnitsType, TimeFrameOptionsType } from '../../types';
+import { TimeRange } from '../Range';
+import { Select } from '../Select';
 
+import { GAS_PRICES_UNITS, TIME_FRAMES_OPTIONS } from './constants';
 import style from './style/currencyChart.module.scss';
-import { getDateLabels } from './utils/utils';
+import { getGasTransactionForTimeFrame, getTimeFrame, transformTimeFrame } from './utils';
 
 ChartJS.register(
   CategoryScale,
@@ -36,80 +39,149 @@ ChartJS.register(
   Decimation,
 );
 
-export const CurrencyChart = () => {
+export const CurrencyChart = memo(() => {
   const gasTransactions = useAppSelector(getGasTransactions);
 
-  const [dataInterval, setDataInterval] = useState(gasTransactions);
+  const [timeFrame, setTimeFrame] = useState<ChartPeriodType>('month');
 
-  const gasPrices = dataInterval.map(trans => trans.gasPrice);
-  const gasTimes = gasTransactions.map(trans => getDateLabels(trans.time));
-  const labelTimes = dataInterval.map(trans => getDateLabels(trans.time));
-  const pointsData: number[][] = [];
+  const [timeFramesSelectValue, setTimeFramesSelectValue] =
+    useState<TimeFrameOptionsType>(TIME_FRAMES_OPTIONS[1]);
+  const [gasPriceUnit, setGasPriceUnit] = useState(GAS_PRICES_UNITS[0]);
+  const gasTransactionsForTimeFrame = useMemo(() => {
+    return getGasTransactionForTimeFrame(
+      transformTimeFrame(timeFramesSelectValue),
+      gasTransactions,
+    );
+  }, [timeFramesSelectValue, gasTransactions]);
 
-  gasPrices.forEach((gasPrice, index) => {
-    pointsData.push([gasTimes[index], gasPrice]);
-  });
-  const data: ChartData<'line'> = {
-    labels: labelTimes,
-    datasets: [
-      {
-        data: gasPrices,
-        borderColor: '#4C8ADA',
-        borderWidth: 1,
-        indexAxis: 'x',
-        type: 'line',
-      },
-    ],
-  };
+  const { chartData, setChartData, initialChartData, allTimesPoints } = useChartData(
+    gasTransactionsForTimeFrame,
+  );
 
-  const options: ChartOptions<'line'> = {
-    responsive: true,
+  useEffect(() => {
+    const currentTimeFrame = getTimeFrame(chartData);
 
-    interaction: {
-      intersect: false,
-      mode: 'x',
-    },
-    plugins: {
-      legend: {
-        display: false,
+    setTimeFrame(currentTimeFrame);
+  }, [chartData]);
+
+  const data: ChartData<'line'> = useMemo(
+    () => ({
+      datasets: [
+        {
+          label: 'Gas price',
+          data: chartData,
+          borderColor: '#4C8ADA',
+          backgroundColor: '#4C8ADA',
+          borderWidth: 1.5,
+          indexAxis: 'x',
+          type: 'line',
+        },
+      ],
+    }),
+    [chartData],
+  );
+
+  const options: ChartOptions<'line'> = useMemo(
+    () => ({
+      responsive: true,
+      parsing: false,
+      interaction: {
+        intersect: false,
+        mode: 'index',
       },
-      decimation: {
-        enabled: false,
-        algorithm: 'lttb',
-        samples: 200,
-      },
-    },
-    scales: {
-      y: {
-        beginAtZero: true,
-      },
-      x: {
-        type: 'time',
-        time: {
-          unit: 'month',
+      plugins: {
+        tooltip: {
+          cornerRadius: 8,
+          boxWidth: 10,
+          boxHeight: 10,
+          boxPadding: 5,
+          callbacks: {
+            label(tooltipItem): string | string[] {
+              return `${tooltipItem.dataset.label}: ${tooltipItem.formattedValue} GWei`;
+            },
+          },
+        },
+        legend: {
+          display: false,
+        },
+        decimation: {
+          enabled: false,
+          algorithm: 'lttb',
+          samples: 400,
         },
       },
-    },
-    elements: {
-      point: {
-        radius: 0,
+      scales: {
+        y: {
+          beginAtZero: true,
+        },
+        x: {
+          type: 'time',
+          time: {
+            unit: timeFrame,
+          },
+        },
       },
+      elements: {
+        point: {
+          radius: 0,
+        },
+      },
+    }),
+    [timeFrame],
+  );
+
+  const onTimeRangeChange = useCallback(
+    (dataInterval: number[]) => {
+      const startDataIndex = allTimesPoints.indexOf(dataInterval[0]);
+      const endDataIndex = allTimesPoints.indexOf(dataInterval[1]);
+      const newDataInterval = initialChartData.slice(startDataIndex, endDataIndex);
+
+      setChartData(newDataInterval);
     },
-  };
-
-  const onTimeRangeChange = (dataInterval: number[]) => {
-    console.log(1);
-    const startDataIndex = gasTimes.indexOf(dataInterval[0]);
-    const endDataIndex = gasTimes.indexOf(dataInterval[1]);
-    const newDataInterval = gasTransactions.slice(startDataIndex, endDataIndex);
-
-    setDataInterval(newDataInterval);
-  };
+    [timeFramesSelectValue],
+  );
+  const onTimeFrameSelectChange = useCallback(
+    (option: TimeFrameOptionsType) => {
+      setTimeFramesSelectValue(option);
+      getGasTransactionForTimeFrame(transformTimeFrame(option), gasTransactions);
+    },
+    [gasTransactions, timeFramesSelectValue, setTimeFramesSelectValue],
+  );
+  const onGasPriceUnitSelectChange = useCallback(
+    (option: GasPriceUnitsType) => {
+      setGasPriceUnit(option);
+    },
+    [setGasPriceUnit],
+  );
 
   return (
     <div className={style.currencyChartWrapper}>
+      <div className={style.optionsBlock}>
+        <div className={style.selectBlock}>
+          <label htmlFor="timeFrameSelect">Time frame:</label>
+          <div className={style.select}>
+            <Select
+              options={TIME_FRAMES_OPTIONS}
+              value={timeFramesSelectValue}
+              onChangeOption={option => onTimeFrameSelectChange(option)}
+              id="timeFrameSelect"
+            />
+          </div>
+        </div>
+        <div className={style.selectBlock}>
+          <label htmlFor="gasUnits">Value:</label>
+          <div className={style.select}>
+            <Select
+              options={GAS_PRICES_UNITS}
+              value={gasPriceUnit}
+              onChangeOption={option => onGasPriceUnitSelectChange(option)}
+              id="gasUnits"
+            />
+          </div>
+        </div>
+      </div>
       <Line options={options} data={data} />
-      <TimeRange data={gasTimes} onRangeChange={onTimeRangeChange} />
+      <TimeRange data={allTimesPoints} onTimeRangeChange={onTimeRangeChange} />
     </div>
   );
-};
+});

@@ -1,39 +1,47 @@
 import * as React from 'react';
-import { FC, useEffect, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { getTrackBackground, Range } from 'react-range';
 import { IRenderTrackParams } from 'react-range/lib/types';
 
-import { MS_IN_DAY } from './constants/constants';
+import { steps } from './constants';
 import { thumbIconStyle, thumbStyle, trackStyle } from './style';
 
 type TimeRangePropsType = {
   data: number[];
-  onRangeChange: (timeInterval: number[]) => void;
+  onTimeRangeChange: (timeInterval: number[]) => void;
 };
 
-export const TimeRange: FC<TimeRangePropsType> = ({ data, onRangeChange }) => {
-  const startTime = data[0];
-  const endTime = data[data.length - 1];
-  const [values, setValues] = useState([startTime, endTime]);
+export const TimeRange = memo(({ data, onTimeRangeChange }: TimeRangePropsType) => {
+  const { startTime, endTime } = useMemo(() => {
+    const startTime = data[0];
+    const endTime = data[data.length - 1];
 
-  const setGlobalValues = (newValues: number[]) => {
-    setValues(newValues);
-    onRangeChange(newValues);
-  };
+    return { startTime, endTime };
+  }, [data]);
+
+  const [values, setValues] = useState([startTime || 0, endTime || 1]);
+
+  const onRangeChange = useCallback(
+    (newValues: number[]) => {
+      setValues(newValues);
+      onTimeRangeChange(newValues);
+    },
+    [setValues, onTimeRangeChange],
+  );
 
   useEffect(() => {
-    setGlobalValues([startTime, endTime]);
+    onRangeChange([startTime, endTime]);
   }, [startTime, endTime]);
 
   return (
     <Range
-      allowOverlap
+      draggableTrack
       values={values}
-      step={MS_IN_DAY}
+      step={steps.HOUR}
       min={startTime}
       max={endTime}
-      onChange={values => setGlobalValues(values)}
+      onChange={values => onRangeChange(values)}
       renderTrack={({ props, children }: IRenderTrackParams) => {
         return (
           <div
@@ -118,4 +126,4 @@ export const TimeRange: FC<TimeRangePropsType> = ({ data, onRangeChange }) => {
       }}
     />
   );
-};
+});

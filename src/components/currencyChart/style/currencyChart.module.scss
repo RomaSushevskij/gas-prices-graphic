@@ -1,3 +1,19 @@
 .currencyChartWrapper {
   width: 100%;
+  .optionsBlock {
+    display: flex;
+    justify-content: space-evenly;
+    .selectBlock {
+      display: flex;
+      align-items: center;
+      label {
+        width: max-content;
+        font-weight: bold;
+        margin-right: 20px;
+      }
+      .select {
+        width: 120px;
+      }
+    }
+  }
 }

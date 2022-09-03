@@ -1,9 +1,9 @@
 import { createAsyncThunk, createSlice } from '@reduxjs/toolkit';
 import { AxiosError } from 'axios';
 
-import { ethereumAPI } from '../../../api';
-
 import { RequestStatusType, TransactionType } from './types';
+
+import { ethereumAPI } from './index';
 
 export const fetchGasTransactions = createAsyncThunk<
   { transactions: TransactionType[] },
