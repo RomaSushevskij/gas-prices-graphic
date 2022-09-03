@@ -23,7 +23,7 @@ import { ChartPeriodType, GasPriceUnitsType, TimeFrameOptionsType } from '../../
 import { TimeRange } from '../Range';
 import { Select } from '../Select';
 
-import { GAS_PRICES_UNITS, TIME_FRAMES_OPTIONS } from './constants';
+import { GAS_PRICES_UNITS, TIME_FRAME_WEEK, TIME_FRAMES_OPTIONS } from './constants';
 import style from './style/currencyChart.module.scss';
 import { getGasTransactionForTimeFrame, getTimeFrame, transformTimeFrame } from './utils';
 
@@ -43,10 +43,10 @@ export const CurrencyChart = memo(() => {
   const gasTransactions = useAppSelector(getGasTransactions);
 
   const [timeFrame, setTimeFrame] = useState<ChartPeriodType>('month');
-
   const [timeFramesSelectValue, setTimeFramesSelectValue] =
-    useState<TimeFrameOptionsType>(TIME_FRAMES_OPTIONS[1]);
+    useState<TimeFrameOptionsType>(TIME_FRAMES_OPTIONS[TIME_FRAME_WEEK]);
   const [gasPriceUnit, setGasPriceUnit] = useState(GAS_PRICES_UNITS[0]);
+
   const gasTransactionsForTimeFrame = useMemo(() => {
     return getGasTransactionForTimeFrame(
       transformTimeFrame(timeFramesSelectValue),

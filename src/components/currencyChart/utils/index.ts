@@ -38,25 +38,33 @@ export const getGasTransactionForTimeFrame = (
   switch (timeFrame) {
     case 'year':
       if (gasTransactions.length > HOURS_IN_YEAR) {
-        return gasTransactions.slice(gasTransactions.length - HOURS_IN_YEAR);
+        const FIRST_POINT_OF_LAST_YEAR = gasTransactions.length - HOURS_IN_YEAR;
+
+        return gasTransactions.slice(FIRST_POINT_OF_LAST_YEAR);
       }
 
       return gasTransactions;
     case 'month':
       if (gasTransactions.length > HOURS_IN_MONTH) {
-        return gasTransactions.slice(gasTransactions.length - HOURS_IN_MONTH);
+        const FIRST_POINT_OF_LAST_MONTH = gasTransactions.length - HOURS_IN_MONTH;
+
+        return gasTransactions.slice(FIRST_POINT_OF_LAST_MONTH);
       }
 
       return gasTransactions;
     case 'week':
       if (gasTransactions.length > HOURS_IN_WEEK) {
-        return gasTransactions.slice(gasTransactions.length - HOURS_IN_WEEK);
+        const FIRST_POINT_OF_LAST_WEEK = gasTransactions.length - HOURS_IN_WEEK;
+
+        return gasTransactions.slice(FIRST_POINT_OF_LAST_WEEK);
       }
 
       return gasTransactions;
     case 'day':
       if (gasTransactions.length > HOURS_IN_DAY) {
-        return gasTransactions.slice(gasTransactions.length - HOURS_IN_DAY);
+        const FIRST_POINT_OF_LAST_DAY = gasTransactions.length - HOURS_IN_DAY;
+
+        return gasTransactions.slice(FIRST_POINT_OF_LAST_DAY);
       }
 
       return gasTransactions;
