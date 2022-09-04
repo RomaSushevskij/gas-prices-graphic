@@ -19,13 +19,24 @@ import { Line } from 'react-chartjs-2';
 
 import { useAppSelector, useChartData } from '../../hooks';
 import { getGasTransactions } from '../../store/selectors';
-import { ChartPeriodType, GasPriceUnitsType, TimeFrameOptionsType } from '../../types';
+import { ChartFrameType, GasPriceUnitsType, TimeFrameOptionsType } from '../../types';
 import { TimeRange } from '../Range';
 import { Select } from '../Select';
 
-import { GAS_PRICES_UNITS, TIME_FRAME_WEEK, TIME_FRAMES_OPTIONS } from './constants';
+import {
+  GAS_PRICES_UNITS,
+  THRESHOLD_BETWEEN_POINTS,
+  TIME_FRAME_WEEK,
+  TIME_FRAMES_OPTIONS,
+} from './constants';
 import style from './style/currencyChart.module.scss';
-import { getGasTransactionForTimeFrame, getTimeFrame, transformTimeFrame } from './utils';
+import {
+  createGasChartData,
+  getGasTransactionForTimeFrame,
+  getTimeFrame,
+  largestTriangleThreeBuckets,
+  transformTimeFrame,
+} from './utils';
 
 ChartJS.register(
   CategoryScale,
@@ -42,7 +53,7 @@ ChartJS.register(
 export const CurrencyChart = memo(() => {
   const gasTransactions = useAppSelector(getGasTransactions);
 
-  const [timeFrame, setTimeFrame] = useState<ChartPeriodType>('month');
+  const [timeFrame, setTimeFrame] = useState<ChartFrameType>('month');
   const [timeFramesSelectValue, setTimeFramesSelectValue] =
     useState<TimeFrameOptionsType>(TIME_FRAMES_OPTIONS[TIME_FRAME_WEEK]);
   const [gasPriceUnit, setGasPriceUnit] = useState(GAS_PRICES_UNITS[0]);
@@ -57,12 +68,6 @@ export const CurrencyChart = memo(() => {
   const { chartData, setChartData, initialChartData, allTimesPoints } = useChartData(
     gasTransactionsForTimeFrame,
   );
-
-  useEffect(() => {
-    const currentTimeFrame = getTimeFrame(chartData);
-
-    setTimeFrame(currentTimeFrame);
-  }, [chartData]);
 
   const data: ChartData<'line'> = useMemo(
     () => ({
@@ -136,7 +141,11 @@ export const CurrencyChart = memo(() => {
       const endDataIndex = allTimesPoints.indexOf(dataInterval[1]);
       const newDataInterval = initialChartData.slice(startDataIndex, endDataIndex);
 
-      setChartData(newDataInterval);
+      if (newDataInterval.length > THRESHOLD_BETWEEN_POINTS) {
+        setChartData(largestTriangleThreeBuckets(newDataInterval, THRESHOLD_BETWEEN_POINTS));
+      } else {
+        setChartData(newDataInterval);
+      }
     },
     [timeFramesSelectValue],
   );
@@ -153,6 +162,23 @@ export const CurrencyChart = memo(() => {
     },
     [setGasPriceUnit],
   );
+
+  useEffect(() => {
+    const currentTimeFrame = getTimeFrame(chartData);
+
+    setTimeFrame(currentTimeFrame);
+  }, [chartData]);
+
+  useEffect(() => {
+    if (chartData.length > THRESHOLD_BETWEEN_POINTS) {
+      const logData = largestTriangleThreeBuckets(
+        createGasChartData(gasTransactionsForTimeFrame),
+        THRESHOLD_BETWEEN_POINTS,
+      );
+
+      setChartData(logData);
+    }
+  }, [chartData]);
 
   return (
     <div className={style.currencyChartWrapper}>
