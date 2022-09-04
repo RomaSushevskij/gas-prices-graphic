@@ -10,6 +10,11 @@ export const TIME_FRAMES_OPTIONS: TimeFrameOptionsType[] = [
   'Last week',
   'Last day',
 ];
-export const TIME_FRAME_WEEK = 2;
+export enum timeFrameOption {
+  LAST_YEAR = 'Last year',
+  LAST_MONTH = 'Last month',
+  LAST_WEEK = 'Last week',
+  LAST_DAY = 'Last day',
+}
 export const GAS_PRICES_UNITS = ['Gwei'];
 export const THRESHOLD_BETWEEN_POINTS = 300;

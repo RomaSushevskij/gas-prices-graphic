@@ -26,8 +26,8 @@ import { Select } from '../Select';
 import {
   GAS_PRICES_UNITS,
   THRESHOLD_BETWEEN_POINTS,
-  TIME_FRAME_WEEK,
   TIME_FRAMES_OPTIONS,
+  timeFrameOption,
 } from './constants';
 import style from './style/currencyChart.module.scss';
 import {
@@ -55,7 +55,7 @@ export const CurrencyChart = memo(() => {
 
   const [timeFrame, setTimeFrame] = useState<ChartFrameType>('month');
   const [timeFramesSelectValue, setTimeFramesSelectValue] =
-    useState<TimeFrameOptionsType>(TIME_FRAMES_OPTIONS[TIME_FRAME_WEEK]);
+    useState<TimeFrameOptionsType>(timeFrameOption.LAST_MONTH);
   const [gasPriceUnit, setGasPriceUnit] = useState(GAS_PRICES_UNITS[0]);
 
   const gasTransactionsForTimeFrame = useMemo(() => {
@@ -142,7 +142,9 @@ export const CurrencyChart = memo(() => {
       const newDataInterval = initialChartData.slice(startDataIndex, endDataIndex);
 
       if (newDataInterval.length > THRESHOLD_BETWEEN_POINTS) {
-        setChartData(largestTriangleThreeBuckets(newDataInterval, THRESHOLD_BETWEEN_POINTS));
+        setChartData(
+          largestTriangleThreeBuckets(newDataInterval, THRESHOLD_BETWEEN_POINTS),
+        );
       } else {
         setChartData(newDataInterval);
       }
