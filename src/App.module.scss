@@ -1,9 +1,12 @@
 .container {
   height: 100vh;
+  margin: 20px;
   display: flex;
   justify-content: center;
-  align-items: center;
   .chartBlock {
-    width: 80vw;
+    width: 80%;
+    @media screen and (max-width: 768px) {
+      width: 100%;
+    }
   }
 }

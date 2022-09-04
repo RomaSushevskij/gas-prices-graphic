@@ -12,7 +12,15 @@
         margin-right: 20px;
       }
       .select {
-        width: 120px;
+        width: 100px;
+      }
+    }
+    @media screen and (max-width: 500px) {
+      font-size: 12px;
+      .selectBlock {
+        label {
+          margin-right: 5px;
+        }
       }
     }
   }

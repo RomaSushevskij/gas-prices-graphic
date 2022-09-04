@@ -1,11 +1,18 @@
 import * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
-import { getTrackBackground, Range } from 'react-range';
+import { Range } from 'react-range';
 import { IRenderTrackParams } from 'react-range/lib/types';
 
 import { steps } from './constants';
-import { thumbIconStyle, thumbStyle, trackStyle } from './style';
+import {
+  getMoveTrackStyle,
+  getThumbLabelStyle,
+  thumbIconStyle,
+  thumbLabelPointerStyle,
+  thumbStyle,
+  trackStyle,
+} from './style';
 
 type TimeRangePropsType = {
   data: number[];
@@ -55,21 +62,7 @@ export const TimeRange = memo(({ data, onTimeRangeChange }: TimeRangePropsType) 
               ...trackStyle,
             }}
           >
-            <div
-              ref={props.ref}
-              style={{
-                height: '30px',
-                width: '100%',
-                borderRadius: '4px',
-                position: 'relative',
-                background: getTrackBackground({
-                  values,
-                  colors: ['#D7E1E7', '#9DB3C2', '#D7E1E7'],
-                  min: startTime,
-                  max: endTime,
-                }),
-              }}
-            />
+            <div ref={props.ref} style={getMoveTrackStyle(values, startTime, endTime)} />
             {children}
           </div>
         );
@@ -93,32 +86,8 @@ export const TimeRange = memo(({ data, onTimeRangeChange }: TimeRangePropsType) 
             }}
           >
             <div style={thumbIconStyle} />
-            <div
-              style={{
-                width: 'max-content',
-                position: 'absolute',
-                top: '-38px',
-                color: '#666666',
-                fontSize: '14px',
-                fontFamily: 'Arial,Helvetica Neue,Helvetica,sans-serif',
-                padding: '4px',
-                borderRadius: '4px',
-                backgroundColor: '#D7E1E7',
-                transform: `scale(${isDragged ? '1' : '0'})`,
-                transition: 'all .1s ease-in-out',
-              }}
-            >
-              <div
-                style={{
-                  position: 'absolute',
-                  width: '8px',
-                  height: '8px',
-                  bottom: '-4px',
-                  backgroundColor: '#D7E1E7',
-                  transform: 'rotate(45deg)',
-                  left: 'calc(100% / 2 - 4px)',
-                }}
-              />
+            <div style={getThumbLabelStyle(isDragged)}>
+              <div style={thumbLabelPointerStyle} />
               {label}
             </div>
           </div>
