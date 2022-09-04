@@ -1,4 +1,3 @@
-import * as React from 'react';
 import { memo, useCallback, useEffect, useMemo, useState } from 'react';
 
 import { Range } from 'react-range';
