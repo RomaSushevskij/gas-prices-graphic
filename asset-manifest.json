@@ -1,15 +1,15 @@
 {
   "files": {
-    "main.css": "/gas-prices-graphic/static/css/main.642b4339.css",
-    "main.js": "/gas-prices-graphic/static/js/main.ecc35303.js",
+    "main.css": "/gas-prices-graphic/static/css/main.3440add4.css",
+    "main.js": "/gas-prices-graphic/static/js/main.cfbffa90.js",
     "static/js/787.60289cef.chunk.js": "/gas-prices-graphic/static/js/787.60289cef.chunk.js",
     "index.html": "/gas-prices-graphic/index.html",
-    "main.642b4339.css.map": "/gas-prices-graphic/static/css/main.642b4339.css.map",
-    "main.ecc35303.js.map": "/gas-prices-graphic/static/js/main.ecc35303.js.map",
+    "main.3440add4.css.map": "/gas-prices-graphic/static/css/main.3440add4.css.map",
+    "main.cfbffa90.js.map": "/gas-prices-graphic/static/js/main.cfbffa90.js.map",
     "787.60289cef.chunk.js.map": "/gas-prices-graphic/static/js/787.60289cef.chunk.js.map"
   },
   "entrypoints": [
-    "static/css/main.642b4339.css",
-    "static/js/main.ecc35303.js"
+    "static/css/main.3440add4.css",
+    "static/js/main.cfbffa90.js"
   ]
 }
